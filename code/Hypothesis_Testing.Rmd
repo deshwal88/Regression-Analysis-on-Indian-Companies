@@ -35,7 +35,7 @@ non_blr <- subset(df, INDIA.HQ != "Bangalore / Bengaluru")$PACKAGE
 blr <- blr[!is.na(blr)]
 non_blr <- non_blr[!is.na(non_blr)]
 
-t.test(blr, non_blr, var.equal = FALSE)
+t.test(blr, non_blr, var.equal = FALSE) #Welch's test
 ```
 
 ```{r}
@@ -48,7 +48,7 @@ summary(anova_model)
 ```
 
 ```{r}
-# Test: Are INDUSTRY and INDIA.HQ independent?
+# Test: Are INDUSTRY and INDIA.HQ dependent?
 # H0: They are independent
 # H1: They are dependent
 cat("\n--- CHI-SQUARE TEST (INDUSTRY vs INDIA.HQ) ---\n")

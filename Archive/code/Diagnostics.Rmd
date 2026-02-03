@@ -1,0 +1,157 @@
+---
+title: "Diagnostics"
+output: html_document
+date: "2025-12-05"
+---
+
+Loading the data:
+
+```{r, echo=FALSE}
+data = read.csv("indian_companies_processed.csv", skipNul = TRUE, row.names=1)
+head(data)
+```
+
+```{r, echo=FALSE}
+lmod = lm(PACKAGE ~ ., data = data)
+summary(lmod)
+n = nrow(data)
+p = length(coef(lmod))
+```
+
+# Residuals vs Fitted Values
+
+```{r, echo=FALSE}
+plot(lmod, 1)
+```
+
+The residuals vs fitted plot indicates clear heteroscedasticity, as the spread of residuals increases for larger fitted PACKAGE values. The pattern is not centered tightly around zero, and a downward trend is visible, suggesting model misspecification or missing nonlinear terms. A few companies (e.g., Infosys, Teleperformance, iEnergizer) display extreme deviations, indicating potential outliers and influential observations
+
+# Box-Cox
+
+```{r, echo=FALSE}
+library(MASS)
+
+bc = boxcox(lmod, lambda = seq(-2, 2, 0.1))
+bc
+```
+
+```{r, echo=FALSE}
+lambda_opt = bc$x[which.max(bc$y)]
+lambda_opt
+```
+
+Since λ is close to zero, we apply log transformations.
+
+```{r, echo=FALSE}
+data$logPACKAGE = log(data$PACKAGE)
+lmod_log = lm(logPACKAGE ~ ., data = data)
+summary(lmod_log)
+```
+
+```{r, echo=FALSE}
+plot(lmod_log, 1)
+```
+
+Heteroscedasticity is still not eliminated.
+
+# Q-Q Plot:
+
+```{r, echo=FALSE}
+resi = residuals(lmod)
+qqnorm(resi)
+qqline(resi)
+```
+
+The Q-Q plot shows strong departure from normality, with heavy tails on both ends. Extreme upper-tail and lower-tail values indicate that the error distribution is heavy-tailed, violating the normality assumption. This suggests either influential companies or that certain predictors have long-tailed behavior impacting salaries. Transformation or robust regression could be considered.
+
+Shapiro Test can't be performed because there are more than 5000 rows in the dataset.
+
+# Residual Plots:
+```{r, echo=FALSE}
+library(car)
+avPlots(lm(PACKAGE ~ YEARS.OLD + TOTAL_EMPLOYEES + BRANCHES + RATING + REVIEWS,
+           data = data), ask = FALSE)
+```
+
+BRANCHES has a strong negative partial relationship with salary.
+REVIEWS shows a strong positive partial relationship with salary, increasing sharply for high review counts.
+YEARS.OLD, TOTAL_EMPLOYEES, and RATING demonstrate weak or flat partial effects, indicating limited independent contribution once other predictors are controlled.
+Several observations (e.g., TCS, Teleperformance, iEnergizer, HDFC Bank) appear as outlying or high-leverage points in multiple plots, reinforcing influence concerns.
+
+# Leverage Points:
+
+```{r, echo=FALSE}
+hval = hatvalues(lmod)
+#which(hval > 2 * p/n)
+```
+
+A large number of observations exceed the leverage threshold 2p/n, indicating many high-leverage companies in the dataset. Most high-leverage cases belong to very large or very small firms (e.g., TCS, Reliance Retail, Infosys, Axis Bank). Their combination of extreme workforce/branch presence makes them disproportionately influential in estimating regression coefficients.
+
+# Jackknife Residuals:
+
+```{r, echo=FALSE}
+jackres = rstudent(lmod)
+
+crival <- abs(qt(0.1/2/n, n - 1 - p))
+crival
+
+idy = which(abs(jackres) > crival)
+idy
+```
+
+Using the jackknife-derived outlier threshold (crival = 4.41), we observe that iEnergizer, Teleperformance, Infosys, Cognizant, Accenture, and TCS have residual magnitudes far greater than the cutoff. This confirms these observations as true statistical outliers under formal studentized residual testing, rather than heuristic cutoffs. Their extreme salary positions (either significantly above or below model-implied pay levels) indicate structural salary differences not captured by the current predictors.
+
+# Cook's Distance:
+
+```{r, echo=FALSE}
+library("faraway")
+cook = cooks.distance(lmod)
+halfnorm(cook, 1, labs = rownames(data), ylab = "Cook's distance")
+
+idx <- which(cook > 1)
+idx
+```
+
+# Log transformation since heteroscedasticity wasn't completely eliminated:
+
+```{r, echo=FALSE}
+data$logPACKAGE2 = log(data$PACKAGE)
+data$logREVIEWS = log(data$REVIEWS)
+data$logRATING = log(data$RATING)
+data$logBRANCHES = log(data$BRANCHES)
+lmod_log2 = lm(logPACKAGE2 ~ YEARS.OLD + INDUSTRY + INDIA.HQ + TOTAL_EMPLOYEES + logBRANCHES + logRATING + logREVIEWS, data = data)
+summary(lmod_log2)
+```
+
+Residuals vs Fitted after transformations
+
+```{r}
+plot(lmod_log2, 1)
+```
+
+# Cook's distance after transformations:
+
+```{r, echo=FALSE}
+library("faraway")
+cook = cooks.distance(lmod_log2)
+halfnorm(cook, 1, labs = rownames(data), ylab = "Cook's distance")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

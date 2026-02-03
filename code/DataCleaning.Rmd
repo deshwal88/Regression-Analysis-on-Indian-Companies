@@ -299,7 +299,7 @@ df <- data[c("YEARS.OLD.CLEANED","INDUSTRY.LUMPED","INDIA.HQ.LUMPED","TOTAL_EMPL
 colnames(df) = c("YEARS.OLD","INDUSTRY","INDIA.HQ","TOTAL_EMPLOYEES","BRANCHES","RATING","REVIEWS","PACKAGE")
 rownames(df) = data[, 1]
 
-write.csv(df, "indian_companies_processed.csv", row.names = TRUE)
+#write.csv(df, "indian_companies_processed.csv", row.names = TRUE)
 
 summary(df)
 
