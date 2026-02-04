@@ -14,7 +14,7 @@ data$INDIA.HQ = factor(data$INDIA.HQ)
 ```
 
 ```{r}
-lmod = lm(PACKAGE ~ ., data)
+lmod = lm(PACKAGE ~ YEARS.OLD + INDUSTRY + INDIA.HQ + TOTAL_EMPLOYEES + BRANCHES + I(RATING^2) + REVIEWS, data)
 summary(lmod)
 ```
 
@@ -52,7 +52,7 @@ High Condition Number states that this is an extreme case of Multi-collinearity 
 library(faraway)
 v = vif(lmod)
 print(v)
-cat("Average VIF for predictors: ", sum(v)/p)
+cat("Average VIF for predictors: ", sum(v)/p, "\n")
 cat("Maximum value of VIF: ", max(v))
 ```
 Average and Maximum values of VIF depicts that the variance of each estimate is not inflated (atleast to a value that posses a concern). The huge condition number is due to design-matrix structure (dummy coding), not harmful collinearity in the regression coefficients. Furthermore, the pairwise correlations among predictors are all below 0.6, which is additional evidence that the independent variables do not exhibit strong linear relationships.
@@ -83,6 +83,7 @@ Looking at the AIC vs Index plot, we see that AIC remains almost constant after 
 out = step(null, scope = list(lower=~1, upper=formula(full)), direction = "both", k=log(n), trace = FALSE)
 cat("Order of parameters:", out$anova[,1], "\n")
 cat("Adjusted R-squared: ", summary(out)$adj.r.squared)
+summary(out)
 ```
 
 **

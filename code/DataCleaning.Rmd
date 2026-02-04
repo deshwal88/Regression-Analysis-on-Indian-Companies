@@ -70,7 +70,7 @@ summary(data$YEARS.OLD.CLEANED)
 Industry
 **
   
-Removing unwanted values from Industry, i.e. locations from Industry colum
+Removing unwanted values from Industry, i.e. locations from Industry column
 ```{r}
 unique(data$INDUSTRY)[0:30]
 

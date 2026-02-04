@@ -59,6 +59,8 @@ print(chi_test)
 ```
 
 ```{r}
+
+# Test: if Packages are related to Years old or not. (Numeric)
 # H0: ρ = 0 (no correlation)
 # H1: ρ ≠ 0
 cat("\n--- PEARSON CORRELATION (YEARS.OLD vs PACKAGE) ---\n")
@@ -69,6 +71,7 @@ corr_df <- df[, c("YEARS.OLD", "PACKAGE")]
 corr_df <- corr_df[complete.cases(corr_df), ]
 
 cor.test(corr_df$YEARS.OLD, corr_df$PACKAGE, method = "pearson")
+
 ```
 
 
