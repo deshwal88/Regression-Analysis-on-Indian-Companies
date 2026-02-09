@@ -71,8 +71,9 @@ While Rating is almost linear, where quadratic transformation might provide a be
 ```{r, echo=FALSE}
 data$REVIEWS = log(data$REVIEWS)
 data$BRANCHES = log(data$BRANCHES)
+data$RATING = data$RATING - mean(data$RATING, na.rm = TRUE) #centering around mean
 
-lmod_trans = lm(PACKAGE ~ YEARS.OLD + INDUSTRY + INDIA.HQ + TOTAL_EMPLOYEES + BRANCHES + I(RATING^2) + REVIEWS , data)
+lmod_trans = lm(PACKAGE ~ YEARS.OLD + INDUSTRY + INDIA.HQ + TOTAL_EMPLOYEES + BRANCHES + RATING + I(RATING^2) + REVIEWS , data)
 summary(lmod_trans)
 plot(lmod_trans, 1)
 ```
@@ -130,10 +131,10 @@ Removing Outliers that are not influential points.
 ```{r echo=FALSE}
 idx = id_jack[!(id_jack %in% id_cook)]
 transformed_data = data[-idx, ]
-write.csv(transformed_data, "indian_companies_transformed.csv", row.names = TRUE)
+write.csv(transformed_data, "../data/indian_companies_transformed.csv", row.names = TRUE)
 
 
-lmod_final = lm(PACKAGE ~ YEARS.OLD + INDUSTRY + INDIA.HQ + TOTAL_EMPLOYEES + BRANCHES + I(RATING^2) + REVIEWS, transformed_data)
+lmod_final = lm(PACKAGE ~ YEARS.OLD + INDUSTRY + INDIA.HQ + TOTAL_EMPLOYEES + BRANCHES + RATING + I(RATING^2) + REVIEWS, transformed_data)
 resi = residuals(lmod_final)
 qqnorm(resi)
 qqline(resi)
